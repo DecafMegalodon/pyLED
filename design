@@ -1,0 +1,1 @@
+pyLED will consist of two parts: the high level API (python) and a low-level arduino interpreter, which recieves communications over USB. This allows a wide range of devices to control an LED strip without any presumption of the precise timing capabilities on the API host.
