@@ -5,7 +5,9 @@ The arduino interpreter's job is mostly to isolate the LED strip from the unreli
 
 While the interpreter's primary use is to ensure accurate communication between the API host and the LEDs, it has some small additional features planned such as being able to automatically turn off lights on host signal loss and thermal monitoring.
 
-Python API:
+Python API capabilities:
+Maintain HSV and RGB values for all LEDs, to reduce unneccesary RGB <-> HSV rounding errors when only working with one or the other.
+Send only changed LEDs to the arduino when it's time to "draw" colors on the LEDs to reduce overhead
 Defining ranges of LEDs, including non-sequential addresses.
 Directly setting the color (RGB or HSV) of a single LED
 Setting a solid color (RGB or HSV) of a range.
