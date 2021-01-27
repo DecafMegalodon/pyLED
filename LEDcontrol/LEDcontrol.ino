@@ -35,36 +35,20 @@ CRGB* leds; //The LED strip data
 void setup() {
   Serial.begin(115200);
   while (Serial.available() < 2) {}  //Wait until we know how many LEDs are in the strip. 2 bytes.
-  num_LEDs = (serial_buffer[0] << 8) + serial_buffer[1];
-  Serial.print(num_LEDs);
+//  num_LEDs = (serial_buffer[0] << 8) + serial_buffer[1];
+  Serial.readBytes((char*) serial_buffer, 2);
+  num_LEDs = serial_buffer[1];
   leds = new CRGB[num_LEDs];
-  
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, num_LEDs);
   FastLED.clear();  //Set all pixels to black
+  //fill_solid(leds, num_LEDs, CRGB(16,32,32));
+  FastLED.show();
+  Serial.println(num_LEDs);  //Echo the number of LEDs back to validate baud rate.
   // Pass control over the strip to the computer
 }
 
 void loop() {
   while (Serial.available() < 5 ) {} //Don't do anything until we have a full command ready
+  Serial.readBytes((char*) serial_buffer, 5);
   
-  Serial.readBytes(serial_buffer, 5);
-  
-  
-//    if(serialBuffer[0] != 0xFF)
-//    {
-//      //Serial.println("Update LED");
-//      leds[serialBuffer[0]].r = serialBuffer[1];
-//      leds[serialBuffer[0]].g = serialBuffer[2];
-//      leds[serialBuffer[0]].b = serialBuffer[3];
-//      //Serial.print("\n");
-//    }
-//    else
-//    {
-//      //Serial.println("Flush to strip");
-//      FastLED.show();
-//      //delay(500);
-//      Serial.print("\n");
-//    }
-//  }
-
 }
