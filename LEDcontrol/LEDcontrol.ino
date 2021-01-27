@@ -45,8 +45,11 @@ void setup() {
 }
 
 void loop() {
-//  if (Serial.available() > 3) {
-//    Serial.readBytesUntil('þ', serialBuffer,4);
+  while (Serial.available() < 5 ) {} //Don't do anything until we have a full command ready
+  
+  Serial.readBytes(serial_buffer, 5);
+  
+  
 //    if(serialBuffer[0] != 0xFF)
 //    {
 //      //Serial.println("Update LED");
