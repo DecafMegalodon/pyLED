@@ -25,6 +25,7 @@
 #include <pixeltypes.h>
 #include <platforms.h>
 #include <power_mgt.h>
+
 #define DATA_PIN 7
 
 byte serial_buffer[5];
@@ -33,41 +34,34 @@ CRGB* leds; //The LED strip data
 
 void setup() {
   Serial.begin(115200);
-  if (Serial.available() < 2) {  //Wait until we know how many LEDs are in the strip. 2 bytes.
-    
-  }
+  while (Serial.available() < 2) {}  //Wait until we know how many LEDs are in the strip. 2 bytes.
+  num_LEDs = (serial_buffer[0] << 8) + serial_buffer[1];
+  Serial.print(num_LEDs);
+  leds = new CRGB[num_LEDs];
   
-  //Init strip data
-  //Set all LEDs to off
-  //Send 0x00 over serial to indicate completion?
-//  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
-//  for(int i = 0; i < NUM_LEDS; i++)
-//  {
-//    leds[i] = 0x000000;
-//    FastLED.show();
-//  }
-
+  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, num_LEDs);
+  FastLED.clear();  //Set all pixels to black
+  // Pass control over the strip to the computer
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  if (Serial.available() > 3) {
-    Serial.readBytesUntil('þ', serialBuffer,4);
-    if(serialBuffer[0] != 0xFF)
-    {
-      //Serial.println("Update LED");
-      leds[serialBuffer[0]].r = serialBuffer[1];
-      leds[serialBuffer[0]].g = serialBuffer[2];
-      leds[serialBuffer[0]].b = serialBuffer[3];
-      //Serial.print("\n");
-    }
-    else
-    {
-      //Serial.println("Flush to strip");
-      FastLED.show();
-      //delay(500);
-      Serial.print("\n");
-    }
-  }
+//  if (Serial.available() > 3) {
+//    Serial.readBytesUntil('þ', serialBuffer,4);
+//    if(serialBuffer[0] != 0xFF)
+//    {
+//      //Serial.println("Update LED");
+//      leds[serialBuffer[0]].r = serialBuffer[1];
+//      leds[serialBuffer[0]].g = serialBuffer[2];
+//      leds[serialBuffer[0]].b = serialBuffer[3];
+//      //Serial.print("\n");
+//    }
+//    else
+//    {
+//      //Serial.println("Flush to strip");
+//      FastLED.show();
+//      //delay(500);
+//      Serial.print("\n");
+//    }
+//  }
 
 }
