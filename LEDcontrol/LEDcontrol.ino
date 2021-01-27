@@ -25,21 +25,27 @@
 #include <pixeltypes.h>
 #include <platforms.h>
 #include <power_mgt.h>
-
-#define NUM_LEDS 60
 #define DATA_PIN 7
 
-CRGB leds[NUM_LEDS];
-byte serialBuffer[4];
+byte serial_buffer[5];
+int num_LEDs;
+CRGB* leds; //The LED strip data
 
 void setup() {
   Serial.begin(115200);
-  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
-  for(int i = 0; i < NUM_LEDS; i++)
-  {
-    leds[i] = 0x000000;
-    FastLED.show();
+  if (Serial.available() < 2) {  //Wait until we know how many LEDs are in the strip. 2 bytes.
+    
   }
+  
+  //Init strip data
+  //Set all LEDs to off
+  //Send 0x00 over serial to indicate completion?
+//  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+//  for(int i = 0; i < NUM_LEDS; i++)
+//  {
+//    leds[i] = 0x000000;
+//    FastLED.show();
+//  }
 
 }
 
@@ -47,11 +53,6 @@ void loop() {
   // put your main code here, to run repeatedly:
   if (Serial.available() > 3) {
     Serial.readBytesUntil('þ', serialBuffer,4);
-    //Serial.println("Buffer read in");
-    //Serial.print(serialBuffer[0]);
-    //Serial.print(serialBuffer[1]);
-    //Serial.print(serialBuffer[2]);
-    //Serial.print(serialBuffer[3]);
     if(serialBuffer[0] != 0xFF)
     {
       //Serial.println("Update LED");
