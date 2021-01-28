@@ -3,11 +3,18 @@ import time
 num_led = 15
 
 #returns a serial connection object that can be read from an written to.
+#Initialized the number of LEDs and verifies that the arduino is good to go
 #  Blocks until a connection is established
-def create_connection(port_name, baud):
+def init_connection(port_name, baud, led_count):
     try:
         conn = serial.Serial(port=port_name, baudrate=baud, timeout=1)
         if conn.is_open:
+            byte1 = led_count % 256
+            byte2 = (led_count - byte1) >> 8
+            barry = bytearray()
+            barry.append(byte1)
+            barry.append(byte2)
+            conn.write(barry)
             return conn
         else:
             print("Didn't manage to connect. Retrying...")
@@ -16,16 +23,4 @@ def create_connection(port_name, baud):
         print("Likely an invalid or unconnected serial port.")
         exit(1)
 
-arduino = create_connection("/dev/ttyACM0", 115200)
-time.sleep(1)
-test = bytearray()
-test.append(0)
-test.append(num_led)
-arduino.write(test)
-time.sleep(.5)
-ardreturn = arduino.readline()
-print(ardreturn)
-if int(ardreturn) == num_led:
-    print("Hooray!")
-else:
-    print("Womp :(")
+arduino = init_connection("/dev/ttyACM0", 115200, 15)

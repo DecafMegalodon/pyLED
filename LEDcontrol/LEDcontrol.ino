@@ -36,7 +36,6 @@ int cur_LED;
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("Greetings from the arduino!");
   while (Serial.available() < 2) {}  //Wait until we know how many LEDs are in the strip. 2 bytes.
 //  num_LEDs = (serial_buffer[0] << 8) + serial_buffer[1];
   Serial.readBytes((char*) serial_buffer, 2);
@@ -54,6 +53,7 @@ void loop() {
   
   instruction = serial_buffer[0] >> 4;  //Take only the high 4 bits of byte 1
   cur_LED = (serial_buffer[0] << 12 >> 4) + serial_buffer[1];  //Shift out the high 4 bites of buffer[0] since they're the instruction, not LED data
+                                                               //We're operating under the assumption of 16 bit math 
   //Todo: Determine if bit shifting or modular arithmetic are faster on this platform
   
   switch(instruction){
