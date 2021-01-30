@@ -29,4 +29,31 @@ def init_connection(port_name, baud, led_count):
         print("Likely an invalid or unconnected serial port.")
         exit(1)
 
+#Sends a command to the arduino.
+#Bit lengths:
+#Opcode:4, arg0:12, arg1-3: 8
+def send_command(conn, opcode, arg0, arg1, arg2, arg3):
+    assert opcode < (2**4)  #Also don't do negative values.
+    assert arg0 < (2**12)
+    assert arg1 < (2**8)
+    assert arg2 < (2**8)
+    assert arg3 < (2**8)
+    byte1 = arg0 % 2**8 
+    byte0 = (opcode << 4) + ((arg0 - byte1) >> 4)
+    barry = bytearray()
+    barry.append(byte0)
+    barry.append(byte1)
+    barry.append(arg1)
+    barry.append(arg2)
+    barry.append(arg3)
+    conn.write(barry)
+    
+    
+
 arduino = init_connection("/dev/ttyACM0", 115200, 20)
+for led in range(40):
+    send_command(arduino, 0, led, 255, 255, 255)
+    time.sleep(.1)
+    send_command(arduino, 1, 0, 0, 0, 0)
+    print(led)
+    time.sleep(.2)
