@@ -43,6 +43,7 @@ void setup() {
   leds = new CRGB[num_LEDs];
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, num_LEDs);
   FastLED.clear();  //Set all pixels to black
+  FastLED.show();
   Serial.println(num_LEDs);  //Echo the number of LEDs back to validate baud rate.
   // Pass control over the strip to the computer
 }
