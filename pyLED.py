@@ -43,6 +43,10 @@ def send_command(conn, opcode, arg0, arg1, arg2, arg3):
     barry = bytearray()
     barry.append(byte0)
     barry.append(byte1)
+    if opcode != 0:
+        print("Arg0 = ", arg0)
+        print("byte0 = ", byte0)
+        print("byte1 = ", byte1)
     barry.append(arg1)
     barry.append(arg2)
     barry.append(arg3)
@@ -51,9 +55,9 @@ def send_command(conn, opcode, arg0, arg1, arg2, arg3):
     
 
 arduino = init_connection("/dev/ttyACM0", 115200, 20)
-for led in range(40):
-    send_command(arduino, 0, led, 255, 255, 255)
+for led in range(25):
+    send_command(arduino, 0, led, 255, 0, 255)
     time.sleep(.1)
     send_command(arduino, 1, 0, 0, 0, 0)
     print(led)
-    time.sleep(.2)
+    time.sleep(2)
