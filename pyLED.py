@@ -56,8 +56,6 @@ def send_command(conn, opcode, arg0, arg1, arg2, arg3):
 
 arduino = init_connection("/dev/ttyACM0", 115200, 110)
 while True:
-    for step in range(0,8):
-        print("Weeee")
-        for hue in range(0,255,4):
-            send_command(arduino, 3, 0, 110, hue, step)
-            send_command(arduino, 1, 0, 0, 0, 0)
+    for hue in range(0,255,1):
+        send_command(arduino, 3, 0, 110, hue, 1)
+        send_command(arduino, 1, 0, 0, 0, 0)

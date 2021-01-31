@@ -33,6 +33,7 @@ int num_LEDs;
 CRGB* leds; //The LED strip data
 int instruction;
 int cur_LED;
+long timeout = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -49,7 +50,15 @@ void setup() {
 }
 
 void loop() {
-  while (Serial.available() < 5 ) {} //Don't do anything until we have a full command ready
+  while (Serial.available() < 5 ) {
+    timeout += 1;
+    if(timeout == 2147483){
+      FastLED.clear();
+      FastLED.show();
+      timeout = 0; 
+    }
+  } //Don't do anything until we have a full command ready
+  timeout = 0;  //Reset the auto-blank since we got a command
   Serial.readBytes((char*) serial_buffer, 5);
   
   instruction = serial_buffer[0] >> 4;  //Take only the high 4 bits of byte 1
