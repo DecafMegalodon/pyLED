@@ -52,7 +52,7 @@ void setup() {
 void loop() {
   while (Serial.available() < 5 ) {
     timeout += 1;
-    if(timeout == 2147483){
+    if(timeout == 21474835){
       FastLED.clear();
       FastLED.show();
       timeout = 0; 
