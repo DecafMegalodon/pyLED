@@ -50,6 +50,8 @@ def send_command(conn, opcode, arg0, arg1, arg2, arg3):
     barry.append(arg3)
     print(barry)
     conn.write(barry)
+    if opcode == 1:
+        conn.readline()
     
     
 
@@ -57,6 +59,6 @@ arduino = init_connection("/dev/ttyACM0", 115200, 110)
 for led in range(0,110):
     send_command(arduino, 0, led, 255, 0, 255)
     #time.sleep(.05)
-    send_command(arduino, 1, 0, 0, 0, 0)
     print(led)
     #time.sleep(.05)
+send_command(arduino, 1, 0, 0, 0, 0)

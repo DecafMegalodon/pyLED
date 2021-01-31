@@ -63,6 +63,7 @@ void loop() {
       break;
     case(1):  //"Draw" sent LEDs
       FastLED.show();
+      Serial.println();  //Send an empty line over serial so the host knows when we can accept input again
       break;
     case(2):  //Set all LEDs to the same color
       fill_solid(leds, num_LEDs, (CRGB) serial_buffer[2]);
