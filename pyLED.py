@@ -23,7 +23,7 @@ def init_connection(port_name, baud, led_count):
                 print("Do you need to reset the arduino or change the baud rate?")
                 exit(1)
         else:
-            print("Didn't manage to connect. Retrying...")
+            print("Didn't manage to connect. Retrying...")  #Todo: Make it actually retry
     except:
         print("There was an error establishing a serial connection.")
         print("Likely an invalid or unconnected serial port.")
@@ -33,31 +33,30 @@ def init_connection(port_name, baud, led_count):
 #Bit lengths:
 #Opcode:4, arg0:12, arg1-3: 8
 def send_command(conn, opcode, arg0, arg1, arg2, arg3):
-    assert opcode < (2**4)  #Also don't do negative values.
+    assert opcode < (2**4)  #Also don't do negative values. Temporary asserts for testing
     assert arg0 < (2**12)
     assert arg1 < (2**8)
     assert arg2 < (2**8)
     assert arg3 < (2**8)
-    byte1 = arg0 % 2**8 
-    byte0 = (opcode << 4) + ((arg0 - byte1) >> 4)
+    bytes_0_and_1 = opcode << 12
+    bytes_0_and_1 += arg0
+    byte_1 = bytes_0_and_1 % 256
+    byte_0 = (bytes_0_and_1 - byte_1) >> 8
     barry = bytearray()
-    barry.append(byte0)
-    barry.append(byte1)
-    if opcode != 0:
-        print("Arg0 = ", arg0)
-        print("byte0 = ", byte0)
-        print("byte1 = ", byte1)
+    barry.append(byte_0)
+    barry.append(byte_1)
     barry.append(arg1)
     barry.append(arg2)
     barry.append(arg3)
+    print(barry)
     conn.write(barry)
     
     
 
-arduino = init_connection("/dev/ttyACM0", 115200, 20)
-for led in range(25):
+arduino = init_connection("/dev/ttyACM0", 115200, 110)
+for led in range(0,110):
     send_command(arduino, 0, led, 255, 0, 255)
-    time.sleep(.1)
+    #time.sleep(.05)
     send_command(arduino, 1, 0, 0, 0, 0)
     print(led)
-    time.sleep(2)
+    #time.sleep(.05)
