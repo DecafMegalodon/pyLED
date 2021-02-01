@@ -75,7 +75,7 @@ void loop() {
       Serial.println();  //Send an empty line over serial so the host knows when we can accept input again
       break;
     case(2):  //Set all LEDs to the same color
-      fill_solid(leds, num_LEDs, (CRGB) serial_buffer[2]);
+      fill_solid(leds, num_LEDs, CRGB(255,0,255);
       break;
     //Set a (Max value and max saturation) hue gradient.
     //Custom operands: cur_LED is the starting LED, R is the number of LEDs (limited to 255), G is the initial hue, and B is the hue step between LEDs
