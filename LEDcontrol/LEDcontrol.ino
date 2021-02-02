@@ -75,13 +75,17 @@ void loop() {
       Serial.println();  //Send an empty line over serial so the host knows when we can accept input again
       break;
     case(2):  //Set all LEDs to the same color
-      fill_solid(leds, num_LEDs, CRGB(255,0,255);
+      fill_solid(leds, num_LEDs, CRGB(serial_buffer[2], serial_buffer[3], serial_buffer[4]));
       break;
     //Set a (Max value and max saturation) hue gradient.
     //Custom operands: cur_LED is the starting LED, R is the number of LEDs (limited to 255), G is the initial hue, and B is the hue step between LEDs
     //If more than 255 LEDs are needed, send a second rainbow draw command
     case(3):
       fill_rainbow(leds+cur_LED, serial_buffer[2], serial_buffer[3], serial_buffer[4]);
+      break;
+    //Full-string update from host. Draws the string once the transmission is complete
+    //After the command is sent, comms should be RGB only until all pixels are updated
+    case(4):
       break;
     }
 }
