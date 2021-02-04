@@ -86,6 +86,7 @@ void loop() {
     //Full-string update from host. Draws the string once the transmission is complete
     //After the command is sent, comms should be RGB only until all pixels are updated
     case(4):
+      
       break;
     }
 }

@@ -48,5 +48,12 @@ class LedStrip:
             self.serial_con.readline()
     
 arduino = LedStrip("/dev/ttyACM0", 110)
-arduino.send_command(2, 0, 32, 0, 64)
-arduino.send_command(1, 0, 0, 0, 0)
+while True:
+    for value in range(0,255,1):
+        #arduino.send_command(3, 0, 110, value, 1)
+        arduino.send_command(2, 0, int(value/2), 0, value)
+        arduino.send_command(1, 0, 0, 0, 0)
+    for value in range(255,0,-1):
+        #arduino.send_command(3, 0, 110, value, 1)
+        arduino.send_command(2, 0, int(value/2), 0, value)
+        arduino.send_command(1, 0, 0, 0, 0)
