@@ -86,7 +86,9 @@ void loop() {
     //Full-string update from host. Draws the string once the transmission is complete
     //After the command is sent, comms should be RGB only until all pixels are updated
     case(4):
-      
+      Serial.readBytes((char*) leds, 3*num_LEDs);
+      FastLED.show();
+      Serial.println();
       break;
     }
 }

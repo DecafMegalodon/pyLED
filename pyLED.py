@@ -23,7 +23,7 @@ class LedStrip:
                     print("Do you need to reset the arduino or change the baud rate?")
                     exit(1)
             else:
-                print("Didn't manage to self.serial_conect. Retrying...")  #Todo: Make it actually retry
+                print("Didn't manage to conect. Retrying...")  #Todo: Make it actually retry
         except  OSError as e:
             print(e)
             
@@ -44,16 +44,18 @@ class LedStrip:
         barry.append(arg2)
         barry.append(arg3)
         self.serial_con.write(barry)
-        if opcode == 1:  #Wait for confirmation from the arduino that the op is complete
-            self.serial_con.readline()
+            
+    def draw(self):
+        self.send_command(1, 0, 0, 0, 0)
+        self.serial_con.readline() #Wait for confirmation from the arduino that the op is complete
     
 arduino = LedStrip("/dev/ttyACM0", 110)
 while True:
     for value in range(0,255,1):
         #arduino.send_command(3, 0, 110, value, 1)
         arduino.send_command(2, 0, int(value/2), 0, value)
-        arduino.send_command(1, 0, 0, 0, 0)
+        arduino.draw()
     for value in range(255,0,-1):
         #arduino.send_command(3, 0, 110, value, 1)
         arduino.send_command(2, 0, int(value/2), 0, value)
-        arduino.send_command(1, 0, 0, 0, 0)
+        arduino.draw()
