@@ -1,6 +1,7 @@
 import serial
 import time
 import colorsys
+import itertools  #LED signal sending
 
 class LED:
     def __init__(self, red = 0, blue = 0, green = 0):
@@ -40,7 +41,7 @@ class LedStrip:
         assert arg1 < (2**8)
         assert arg2 < (2**8)
         assert arg3 < (2**8)
-        bytes_0_and_1 = opcode << 12
+        bytes_0_and_1 = opcode << 12  #Todo: Clean this dumpster fire up!!
         bytes_0_and_1 += arg0
         byte_1 = bytes_0_and_1 % 256
         byte_0 = (bytes_0_and_1 - byte_1) >> 8
@@ -56,18 +57,28 @@ class LedStrip:
         self.send_command(1, 0, 0, 0, 0)
         self.serial_con.readline() #Wait for confirmation from the arduino that the op is complete
         
+    def update(self):
+        '''Updates the arduino's LED color data'''
+        #Todo: Implement heuristics to decide between per-pixel updates for a small number and a lower-overhead full strip update
+        self.send_command(4, 0, 0, 0, 0)  #initiate full-strip update mode
+        for led in self.LED_data:
+            self.serial_con.write(bytearray([led.red, led.green, led.blue]))
+        self.serial_con.readline() #Wait for confirmation from the arduino that the op is complete
+        
     def set_RGB_all(self, r, g, b):
         for led in range(self.num_led):
             self.LED_data[led].red  = r
             self.LED_data[led].green  = g
             self.LED_data[led].blue  = b
-        self.send_command(2, 0, r, g, b)
+        #self.send_command(2, 0, r, g, b)  #Temporarily disabled to test full-strip update mechanism
     
 arduino = LedStrip("/dev/ttyACM0", 110)
 while True:
     for value in range(0,255,1):
         arduino.set_RGB_all(int(value/2), 0, value)
+        arduino.update()
         arduino.draw()
     for value in range(255,0,-1):
         arduino.set_RGB_all(int(value/2), 0, value)
+        arduino.update()
         arduino.draw()
