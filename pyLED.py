@@ -70,15 +70,15 @@ class LedStrip:
             self.LED_data[led].red  = r
             self.LED_data[led].green  = g
             self.LED_data[led].blue  = b
-        #self.send_command(2, 0, r, g, b)  #Temporarily disabled to test full-strip update mechanism
+        self.send_command(2, 0, r, g, b)  #Temporarily disabled to test full-strip update mechanism
     
 arduino = LedStrip("/dev/ttyACM0", 110)
 while True:
     for value in range(0,255,1):
         arduino.set_RGB_all(int(value/2), 0, value)
-        arduino.update()
+        #arduino.update()
         arduino.draw()
     for value in range(255,0,-1):
         arduino.set_RGB_all(int(value/2), 0, value)
-        arduino.update()
+        #arduino.update()
         arduino.draw()

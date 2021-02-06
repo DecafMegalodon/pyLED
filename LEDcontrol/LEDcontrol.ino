@@ -41,7 +41,7 @@ void setup() {
 //  num_LEDs = (serial_buffer[0] << 8) + serial_buffer[1];
   Serial.readBytes((char*) serial_buffer, 2);
   num_LEDs = int(serial_buffer[1]);
-  leds = new CRGB[num_LEDs];
+  leds = new CRGB[num_LEDs];  //This is safe for CRGB even without explicit initialization for each.
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, num_LEDs);
   FastLED.clear();  //Set all pixels to black
   FastLED.show();
@@ -55,6 +55,7 @@ void loop() {
     if(timeout == 21474835){
       FastLED.clear();
       FastLED.show();
+      Serial.readBytes((char*) serial_buffer, Serial.available())  //Clear out the serial data and sleep
       timeout = 0; 
     }
   } //Don't do anything until we have a full command ready
