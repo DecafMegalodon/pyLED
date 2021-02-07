@@ -1,14 +1,14 @@
 import serial
 import time
 import colorsys
-import itertools  #LED signal sending
+import random
 
 class LED:
     def __init__(self, red = 0, blue = 0, green = 0):
         self.red, self.blue, self.green  = red, blue, green
         self.hue, self.saturation, self.val = colorsys.rgb_to_hsv(red, blue, green)
-        rgb_dirty = False  #Mark RGB/HSV as "Dirty" and needing recalculation from the other value
-        hsv_dirty = False
+        self.rgb_dirty = False  #Mark RGB/HSV as "Dirty" and needing recalculation from the other value
+        self.hsv_dirty = False
         
     def read_rgb(self):
         if self.rgb_dirty:
@@ -73,11 +73,22 @@ class LedStrip:
             self.serial_con.write(bytearray(led.read_rgb()))
         self.serial_con.readline() #Wait for confirmation from the arduino that the op is complete
 
+    def set_HSV(self, lednum, h, s, v):
+        led = self.LED_data[lednum]
+        led.hue, led.sat, led.val = h,s,v
+        led.rgb_dirty = True
+        
+    def set_RGB(self, lednum, r, g, b):
+        led = self.LED_data[lednum]
+        led.red, led.green, led.blue = r,g,b
+        led.hsv_dirty = True
+        
     def set_HSV_all(self, h, s, v):
         for led in self.LED_data:
             led.hue, led.sat, led.val = h, s, v
             led.rgb_dirty = True
-        self.send_command(2,0,*(self.LED_data[0].read_rgb() ) )  #Force RGB update on the first LED. Ugly kludge or DRY? You decide.
+        self.LED_data[0].read_rgb()
+        self.send_command(2,0,*(self.LED_data[0].read_rgb() ) )  #Force RGB update on the first LED and read the converted RGB. Ugly kludge or DRY? You decide.
         
         
     def set_RGB_all(self, r, g, b):
@@ -88,18 +99,14 @@ class LedStrip:
         self.send_command(2, 0, r, g, b)
     
 arduino = LedStrip("/dev/ttyACM0", 110)
-slowness = 80
+arduino.update()
+arduino.draw()
+time.sleep(1)
+slowness = 60
 while True:
-    for hue1 in range(0, 7):
-        hue = hue1/7
-        print(hue)
-        for val1 in range(0,slowness,1):
-            val = val1/slowness
-            arduino.set_HSV_all(hue, 1, val)
-            #arduino.update()
-            arduino.draw()
-        for val1 in range(slowness,0,-2):
-            val = val1/slowness
-            arduino.set_HSV_all(hue, 1, min(val,1))
-            #arduino.update()
-            arduino.draw()
+    for led in range(110):
+        arduino.set_RGB(led, random.randint(0,25), random.randint(0,25), random.randint(0,25))
+        print(led)
+        arduino.update()
+        arduino.draw()
+        time.sleep(.1)
