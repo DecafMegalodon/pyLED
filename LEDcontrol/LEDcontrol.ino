@@ -38,7 +38,6 @@ long timeout = 0;
 void setup() {
   Serial.begin(115200);
   while (Serial.available() < 2) {}  //Wait until we know how many LEDs are in the strip. 2 bytes.
-//  num_LEDs = (serial_buffer[0] << 8) + serial_buffer[1];
   Serial.readBytes((char*) serial_buffer, 2);
   num_LEDs = int(serial_buffer[1]);
   leds = new CRGB[num_LEDs];  //This is safe for CRGB even without explicit initialization for each.
@@ -55,7 +54,7 @@ void loop() {
     if(timeout == 21474835){
       FastLED.clear();
       FastLED.show();
-      Serial.readBytes((char*) serial_buffer, Serial.available())  //Clear out the serial data and sleep
+      Serial.readBytes((char*) serial_buffer, Serial.available());  //Clear out the serial data and sleep
       timeout = 0; 
     }
   } //Don't do anything until we have a full command ready
