@@ -77,7 +77,8 @@ class LedStrip:
         for led in self.LED_data:
             led.hue, led.sat, led.val = h, s, v
             led.rgb_dirty = True
-        #todo update all HSV ala RGB_all
+        self.send_command(2,0,*(self.LED_data[0].read_rgb() ) )  #Force RGB update on the first LED. Ugly kludge or DRY? You decide.
+        
         
     def set_RGB_all(self, r, g, b):
         for led in range(self.num_led):
@@ -87,17 +88,18 @@ class LedStrip:
         self.send_command(2, 0, r, g, b)
     
 arduino = LedStrip("/dev/ttyACM0", 110)
+slowness = 80
 while True:
-    for hue1 in range(0, 10, 2):
-        hue = hue1/10
+    for hue1 in range(0, 7):
+        hue = hue1/7
         print(hue)
-        for val1 in range(0,40,1):
-            val = val1/40
+        for val1 in range(0,slowness,1):
+            val = val1/slowness
             arduino.set_HSV_all(hue, 1, val)
-            arduino.update()
+            #arduino.update()
             arduino.draw()
-        for val1 in range(40,0,-2):
-            val = val1/40
+        for val1 in range(slowness,0,-2):
+            val = val1/slowness
             arduino.set_HSV_all(hue, 1, min(val,1))
-            arduino.update()
+            #arduino.update()
             arduino.draw()
