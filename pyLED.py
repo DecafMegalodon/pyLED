@@ -69,6 +69,8 @@ class LedStrip:
             for led in self.LED_data:
                 self.serial_con.write(bytearray(led.read_rgb()))
             self.data_dirty = False
+        else:
+            self.send_command(1, 0, 0, 0, 0)
         self.serial_con.readline() #Wait for confirmation from the arduino that the op is complete
 
     def set_HSV(self, lednum, h, s, v):
@@ -80,16 +82,18 @@ class LedStrip:
     def set_RGB(self, lednum, r, g, b):
         led = self.LED_data[lednum]
         led.red, led.green, led.blue = r,g,b
+        led.rgb_dirty = False
         led.hsv_dirty = True
         self.data_dirty = True
         
     def set_HSV_all(self, h, s, v):
         for led in self.LED_data:
             led.hue, led.sat, led.val = h, s, v
+            led.hsv_dirty = False
             led.rgb_dirty = True
         self.LED_data[0].read_rgb()
-        #Force update on the first LED and read the converted RGB. Ugly kludge or DRY? You decide.
-        self.send_command(2,0,*(self.LED_data[0].read_rgb() ) )
+        #Force HSV->RGB update on the first LED and read the converted RGB.
+        self.send_command(2, 0, *(self.LED_data[0].read_rgb()) )
         #Although some LEDs might be marked dirty for recomputation, the data on the arduino matches that new color data
         self.data_dirty = False
         
@@ -102,8 +106,7 @@ class LedStrip:
         self.data_dirty = False
     
 arduino = LedStrip("/dev/ttyACM0", 110)
-slowness = 60
 while True:
-    for led in range(110):
-        arduino.set_RGB(led, random.randint(0,128), random.randint(0,128), random.randint(0,128))
+    arduino.set_HSV_all(random.random(), 1, .5)
     arduino.display()
+    time.sleep(1)
