@@ -1,7 +1,5 @@
 import serial
-import time
 import colorsys
-import random
 
 class LED:
     def __init__(self, red = 0, blue = 0, green = 0):
@@ -104,9 +102,3 @@ class LedStrip:
             self.LED_data[led].blue  = b
         self.send_command(2, 0, r, g, b)
         self.data_dirty = False
-    
-arduino = LedStrip("/dev/ttyACM0", 110)
-while True:
-    arduino.set_HSV_all(random.random(), 1, .5)
-    arduino.display()
-    time.sleep(1)
