@@ -19,6 +19,7 @@ class LED:
 
 class LedStrip:
     def __init__(self, port_name, led_count, baud=115200):
+        data_dirty = False  #Do we need to set LEDs on the arduino to display the current colors?
         self.num_led = led_count
         self.LED_data = [LED() for a in range(led_count)]
         try:
@@ -61,35 +62,36 @@ class LedStrip:
         barry.append(arg3)
         self.serial_con.write(barry)
             
-    def draw(self):
-        self.send_command(1, 0, 0, 0, 0)
-        self.serial_con.readline() #Wait for confirmation from the arduino that the op is complete
-        
-    def update(self):
-        '''Updates the arduino's LED color data'''
-        #Todo: Implement heuristics to decide between per-pixel updates for a small number and a lower-overhead full strip update
-        self.send_command(4, 0, 0, 0, 0)  #initiate full-strip update mode
-        for led in self.LED_data:
-            self.serial_con.write(bytearray(led.read_rgb()))
+    def display(self):
+        '''Sends data to the arduino as needed and instructs it to display the colors on the LED strip'''
+        if self.data_dirty:
+            self.send_command(4, 0, 0, 0, 0)  #initiate full-strip update mode
+            for led in self.LED_data:
+                self.serial_con.write(bytearray(led.read_rgb()))
+            self.data_dirty = False
         self.serial_con.readline() #Wait for confirmation from the arduino that the op is complete
 
     def set_HSV(self, lednum, h, s, v):
         led = self.LED_data[lednum]
         led.hue, led.sat, led.val = h,s,v
         led.rgb_dirty = True
+        self.data_dirty = True
         
     def set_RGB(self, lednum, r, g, b):
         led = self.LED_data[lednum]
         led.red, led.green, led.blue = r,g,b
         led.hsv_dirty = True
+        self.data_dirty = True
         
     def set_HSV_all(self, h, s, v):
         for led in self.LED_data:
             led.hue, led.sat, led.val = h, s, v
             led.rgb_dirty = True
         self.LED_data[0].read_rgb()
-        self.send_command(2,0,*(self.LED_data[0].read_rgb() ) )  #Force RGB update on the first LED and read the converted RGB. Ugly kludge or DRY? You decide.
-        
+        #Force update on the first LED and read the converted RGB. Ugly kludge or DRY? You decide.
+        self.send_command(2,0,*(self.LED_data[0].read_rgb() ) )
+        #Although some LEDs might be marked dirty for recomputation, the data on the arduino matches that new color data
+        self.data_dirty = False
         
     def set_RGB_all(self, r, g, b):
         for led in range(self.num_led):
@@ -97,13 +99,11 @@ class LedStrip:
             self.LED_data[led].green  = g
             self.LED_data[led].blue  = b
         self.send_command(2, 0, r, g, b)
+        self.data_dirty = False
     
 arduino = LedStrip("/dev/ttyACM0", 110)
-arduino.update()
-arduino.draw()
 slowness = 60
 while True:
     for led in range(110):
         arduino.set_RGB(led, random.randint(0,128), random.randint(0,128), random.randint(0,128))
-    arduino.update()
-    arduino.draw()
+    arduino.display()
