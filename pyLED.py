@@ -20,7 +20,7 @@ class LED:
 class LedStrip:
     def __init__(self, port_name, led_count, baud=115200):
         self.num_led = led_count
-        self.LED_data = [LED(255, 0, 0)] * led_count
+        self.LED_data = [LED() for a in range(led_count)]
         try:
             self.serial_con = serial.Serial(port=port_name, baudrate=baud, timeout=1)
             if self.serial_con.is_open:
@@ -49,7 +49,7 @@ class LedStrip:
         assert arg1 < (2**8)
         assert arg2 < (2**8)
         assert arg3 < (2**8)
-        bytes_0_and_1 = opcode << 12  #Todo: Clean this dumpster fire up!!
+        bytes_0_and_1 = opcode << 12  #Todo: Clean up this dumpster fire!!
         bytes_0_and_1 += arg0
         byte_1 = bytes_0_and_1 % 256
         byte_0 = (bytes_0_and_1 - byte_1) >> 8
@@ -101,12 +101,9 @@ class LedStrip:
 arduino = LedStrip("/dev/ttyACM0", 110)
 arduino.update()
 arduino.draw()
-time.sleep(1)
 slowness = 60
 while True:
     for led in range(110):
-        arduino.set_RGB(led, random.randint(0,25), random.randint(0,25), random.randint(0,25))
-        print(led)
-        arduino.update()
-        arduino.draw()
-        time.sleep(.1)
+        arduino.set_RGB(led, random.randint(0,128), random.randint(0,128), random.randint(0,128))
+    arduino.update()
+    arduino.draw()
