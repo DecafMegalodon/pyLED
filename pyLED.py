@@ -23,18 +23,22 @@ class LedStrip:
         try:
             self.serial_con = serial.Serial(port=port_name, baudrate=baud, timeout=1)
             if self.serial_con.is_open:
-                byte2 = led_count % 256
-                byte1 = (led_count - byte2) >> 8
-                barry = bytearray()
-                barry.append(byte1)
-                barry.append(byte2)
-                self.serial_con.write(barry)
-                result = self.serial_con.readline()
+                self.serial_con.write([15,0,0,0,0])
+                result = int(self.serial_con.readline())
+                if result == 0:  #Not yet initialized
+                    print("Initializing..")
+                    byte2 = led_count % 256
+                    byte1 = (led_count - byte2) >> 8
+                    barry = bytearray()
+                    barry.append(byte1)
+                    barry.append(byte2)
+                    self.serial_con.write(barry)
+                    result = self.serial_con.readline()
                 if int(result) == led_count:
                     print("Serial conection established and verified")
                     return
                 else:
-                    print("Was not able to verify returned value.")
+                    print("Was not able to verify returned value: ", result)
                     print("Do you need to reset the arduino or change the baud rate?")
                     exit(1)
             else:

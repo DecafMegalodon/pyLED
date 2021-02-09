@@ -49,6 +49,9 @@ void setup() {
 }
 
 void loop() {
+  while (Serial.available() < 5 ) {} //The first 5 bytes should be a request to query information from the LEDs.  We're not initialized yet so the info is pretty boring
+  Serial.readBytes((char*) serial_buffer, 5);  //Gobble up the first 5 bytes. We don't care what they are (But it should be 0xF? ?? ?? ?? ??) to signal a request for informatio
+  Serial.println(0);  //Tell the host we're not initialized yet and to proceed with initialization
   while (Serial.available() < 5 ) {
     timeout += 1;
     if(timeout == 21474835){
@@ -90,5 +93,7 @@ void loop() {
       FastLED.show();
       Serial.println();
       break;
+    case(15):  //Query information from a running LED strip. Return format subject to dramatically changing currently
+      Serial.println(num_LEDs);
     }
 }
