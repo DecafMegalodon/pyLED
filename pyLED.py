@@ -23,7 +23,7 @@ class LedStrip:
         try:
             self.serial_con = serial.Serial(port=port_name, baudrate=baud, timeout=1)
             if self.serial_con.is_open:
-                self.serial_con.write([15,0,0,0,0])
+                self.serial_con.write([0xF0,0,0,0,0])
                 result = int(self.serial_con.readline())
                 if result == 0:  #Not yet initialized
                     print("Initializing..")
