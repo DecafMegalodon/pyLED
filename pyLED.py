@@ -56,13 +56,7 @@ class LedStrip:
         bytes_0_and_1 += arg0
         byte_1 = bytes_0_and_1 % 256
         byte_0 = (bytes_0_and_1 - byte_1) >> 8
-        barry = bytearray()
-        barry.append(byte_0)
-        barry.append(byte_1)
-        barry.append(arg1)
-        barry.append(arg2)
-        barry.append(arg3)
-        self.serial_con.write(barry)
+        self.serial_con.write([byte_0, byte_1, arg1, arg2, arg3])
             
     def display(self):
         '''Sends data to the arduino as needed and instructs it to display the colors on the LED strip'''
