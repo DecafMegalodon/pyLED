@@ -27,14 +27,11 @@ class LedStrip:
                 result = int(self.serial_con.readline())
                 if result == 0:  #Not yet initialized
                     print("Initializing..")
-                    byte2 = led_count % 256
-                    byte1 = (led_count - byte2) >> 8
-                    barry = bytearray()
-                    barry.append(byte1)
-                    barry.append(byte2)
-                    self.serial_con.write(barry)
-                    result = self.serial_con.readline()
-                if int(result) == led_count:
+                    byte1 = led_count % 256
+                    byte0 = (led_count - byte1) >> 8
+                    self.serial_con.write([byte0, byte1])
+                    result = int(self.serial_con.readline())
+                if result == led_count:
                     print("Serial conection established and verified")
                     return
                 else:
