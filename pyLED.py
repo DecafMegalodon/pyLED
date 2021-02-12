@@ -47,12 +47,7 @@ class LedStrip:
             print(e)
             
     def send_command(self, opcode, arg0, arg1, arg2, arg3):
-        assert opcode < (2**4)  #Also don't do negative values. Temporary asserts for testing
-        assert arg0 < (2**12)
-        assert arg1 < (2**8)
-        assert arg2 < (2**8)
-        assert arg3 < (2**8)
-        bytes_0_and_1 = opcode << 12  #Todo: Clean up this dumpster fire!!
+        bytes_0_and_1 = opcode << 12
         bytes_0_and_1 += arg0
         byte_1 = bytes_0_and_1 % 256
         byte_0 = (bytes_0_and_1 - byte_1) >> 8
@@ -65,6 +60,7 @@ class LedStrip:
             for led in self.LED_data:
                 self.serial_con.write(bytearray(led.read_rgb()))
             self.data_dirty = False
+            #  The LEDs will be automatically drawn after all data is sent
         else:
             self.send_command(1, 0, 0, 0, 0)
         self.serial_con.readline() #Wait for confirmation from the arduino that the op is complete
@@ -94,9 +90,9 @@ class LedStrip:
         self.data_dirty = False
         
     def set_RGB_all(self, r, g, b):
-        for led in range(self.num_led):
-            self.LED_data[led].red  = r
-            self.LED_data[led].green  = g
-            self.LED_data[led].blue  = b
+        for led in self.LED_data:
+            led.red, led.green, led.blue  = r, g, b
+            led.rgb_dirty = False
+            led.hsv_dirty = True
         self.send_command(2, 0, r, g, b)
         self.data_dirty = False
