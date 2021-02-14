@@ -23,12 +23,13 @@ class LedStrip:
         try:
             self.serial_con = serial.Serial(port=port_name, baudrate=baud, timeout=1)
             if self.serial_con.is_open:
-                self.serial_con.write([0xF0,0,0,0,0])
+                self.serial_con.write([0xF0,00,00,00,00])
                 result = int(self.serial_con.readline())
-                if result == 0:  #Not yet initialized
+                if result == 0:  #Not yet initialized (or something went wrong previously)
                     print("Initializing..")
                     byte1 = led_count % 256
                     byte0 = (led_count - byte1) >> 8
+                    print([byte0, byte1])
                     self.serial_con.write([byte0, byte1])
                     result = int(self.serial_con.readline())
                 if result == led_count:
@@ -40,8 +41,9 @@ class LedStrip:
                     exit(1)
             else:
                 print("Didn't manage to conect. Retrying...")  #Todo: Make it actually retry
-        except  OSError as e:
+        except  OSError as e:  #This mostly triggers from being supplied an incorrect serial port
             print(e)
+            exit(-1)
             
     def send_command(self, opcode, arg0, arg1, arg2, arg3):
         bytes_0_and_1 = opcode << 12

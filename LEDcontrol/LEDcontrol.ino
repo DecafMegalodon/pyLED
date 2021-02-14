@@ -37,10 +37,16 @@ long timeout = 0;
 
 void setup() {
   Serial.begin(115200);
+  
+  while (Serial.available() < 5 ) {} //The first 5 bytes should be a request to query the status of the LEDs
+  Serial.readBytes((char*) serial_buffer, 5);  //Gobble up the first 5 bytes. We don't care what they are (But it should be 0xF? ?? ?? ?? ??) to signal a request for information
+  Serial.println(0);  //Tell the host we're not initialized yet and to proceed with initialization
+  
   while (Serial.available() < 2) {}  //Wait until we know how many LEDs are in the strip. 2 bytes.
   Serial.readBytes((char*) serial_buffer, 2);
   num_LEDs = int(serial_buffer[1]);
   leds = new CRGB[num_LEDs];  //This is safe for CRGB even without explicit initialization for each.
+  
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, num_LEDs);
   FastLED.clear();  //Set all pixels to black
   FastLED.show();
@@ -49,9 +55,6 @@ void setup() {
 }
 
 void loop() {
-  while (Serial.available() < 5 ) {} //The first 5 bytes should be a request to query information from the LEDs.  We're not initialized yet so the info is pretty boring
-  Serial.readBytes((char*) serial_buffer, 5);  //Gobble up the first 5 bytes. We don't care what they are (But it should be 0xF? ?? ?? ?? ??) to signal a request for informatio
-  Serial.println(0);  //Tell the host we're not initialized yet and to proceed with initialization
   while (Serial.available() < 5 ) {
     timeout += 1;
     if(timeout == 21474835){
@@ -71,7 +74,7 @@ void loop() {
   
   switch(instruction){
     case(0):  //Write an LED 
-      memcpy(&leds[cur_LED], serial_buffer+2, 3);  //Todo: this could probably be optimized more.
+      memcpy(leds + cur_LED*3, serial_buffer+2, 3);  //Todo: this could probably be optimized more.
       break;
     case(1):  //"Draw" sent LEDs
       FastLED.show();
