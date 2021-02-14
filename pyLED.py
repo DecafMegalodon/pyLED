@@ -4,9 +4,20 @@ import colorsys
 class LED:
     def __init__(self, red = 0, blue = 0, green = 0):
         self.red, self.blue, self.green  = red, blue, green
-        self.hue, self.saturation, self.val = colorsys.rgb_to_hsv(red, blue, green)
+        self.hue, self.sat, self.val = colorsys.rgb_to_hsv(red, blue, green)
         self.rgb_dirty = False  #Mark RGB/HSV as "Dirty" and needing recalculation from the other value
         self.hsv_dirty = False
+        
+    def set_HSV(self, hue = None, sat = None, val = None):
+        '''Update a pixel's HSV data. If any parameter is not specified, it will remain unchanged'''
+        self.hue, self.sat, self.val = (hue or self.hue), (sat or self.sat), (val or self.val)
+        self.hsv_dirty = False
+        self.rgb_dirty = True
+        
+    def set_RGB(self, r = None, g = None, b = None):
+        self.red, self.blue, self.green = (r or self.r), (g or self.g), (b or self.b)
+        self.hsv_dirty = True
+        self.rgb_dirty = True
         
     def read_rgb(self):
         if self.rgb_dirty:
@@ -65,22 +76,17 @@ class LedStrip:
 
     def set_HSV(self, lednum, h, s, v):
         led = self.LED_data[lednum]
-        led.hue, led.sat, led.val = h,s,v
-        led.rgb_dirty = True
+        led.set_HSV(h,s,v)
         self.data_dirty = True
         
     def set_RGB(self, lednum, r, g, b):
         led = self.LED_data[lednum]
-        led.red, led.green, led.blue = r,g,b
-        led.rgb_dirty = False
-        led.hsv_dirty = True
+        led.set_RGB(r,g,b)
         self.data_dirty = True
         
     def set_HSV_all(self, h, s, v):
         for led in self.LED_data:
-            led.hue, led.sat, led.val = h, s, v
-            led.hsv_dirty = False
-            led.rgb_dirty = True
+            led.set_HSV(h, s, v)
         self.LED_data[0].read_rgb()
         #Force HSV->RGB update on the first LED and read the converted RGB.
         self.send_command(2, 0, *(self.LED_data[0].read_rgb()) )
