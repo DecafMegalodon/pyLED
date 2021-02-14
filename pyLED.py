@@ -29,7 +29,6 @@ class LedStrip:
                     print("Initializing..")
                     byte1 = led_count % 256
                     byte0 = (led_count - byte1) >> 8
-                    print([byte0, byte1])
                     self.serial_con.write([byte0, byte1])
                     result = int(self.serial_con.readline())
                 if result == led_count:
