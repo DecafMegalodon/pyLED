@@ -62,7 +62,20 @@ class LedStrip:
         opcode may be up to 4 bits, arg0 12, and arg 1-3 up to 8 bits
         Command serial format is as such:
         4 bits: command, 
-        12 bits, 8 bits, 8 bits, 8 bits: Nominally representing LED number along with  red, blue and green channels'''
+        12 bits, 8 bits, 8 bits, 8 bits: Nominally representing LED number along with  red, blue and green channels
+        
+        Current opcodes include:
+        0: set a single LED's (arg0) RGB to arg1 .. arg3
+        1: "Draw" the previously sent RGB values
+        2: Set all LEDs to a single RGB value efficiently. RGB stored as arg1 .. arg3
+        3: Set LEDs to a max saturation/value rainbow. Command arguments are custom and non-standard for this command.
+            arg0 indicates the start of the rainbow
+            arg1 indicates the number of LEDs inclued in the rainbow (limited to 255 in a single command invocation)
+            arg2 is the starting hue. It is represented in 0...255 versus 0...1 like much of the rest of the code here.
+            arg3 is the step between hues per LED
+        4: Initiates a full-strip update of all pixels. It should be followed by the red, green, and blue values for all pixels of the strip with no other data
+        15: Is a special command. It's used to query data from the arduino. Currently only returns the number of LEDs known to be on the LED strip (used in initialization mostly)
+        '''
         bytes_0_and_1 = opcode << 12
         bytes_0_and_1 += arg0
         byte_1 = bytes_0_and_1 % 256
