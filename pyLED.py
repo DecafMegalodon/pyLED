@@ -5,7 +5,7 @@ class LED:
     def __init__(self, red = 0, blue = 0, green = 0):
         self.red, self.blue, self.green  = red, blue, green
         self.hue, self.sat, self.val = colorsys.rgb_to_hsv(red, blue, green)
-        self.rgb_dirty = False  #Mark RGB/HSV as "Dirty" and needing recalculation from the other value
+        self.rgb_dirty = False  #Mark RGB/HSV as "dirty" to signal it needing recalculation from the other value
         self.hsv_dirty = False
         
     def set_HSV(self, hue = None, sat = None, val = None):
@@ -15,11 +15,13 @@ class LED:
         self.rgb_dirty = True
         
     def set_RGB(self, r = None, g = None, b = None):
+        '''Update a pixel's RGB data. If any parameter is not specified, it will remain unchanged'''
         self.red, self.blue, self.green = (r or self.r), (g or self.g), (b or self.b)
         self.hsv_dirty = True
         self.rgb_dirty = True
         
     def read_rgb(self):
+        '''Returns an RGB tuple, calculating the values as needed from HSV'''
         if self.rgb_dirty:
             #maintain RGB in 0..255 range  for native use with LEDs even though colorsys uses 0..1 range
             self.red, self.blue, self.green  = [int(c*255) for c in colorsys.hsv_to_rgb(self.hue, self.sat, self.val)]
@@ -56,6 +58,11 @@ class LedStrip:
             exit(-1)
             
     def send_command(self, opcode, arg0, arg1, arg2, arg3):
+        '''Send a packed command to the arduino.
+        opcode may be up to 4 bits, arg0 12, and arg 1-3 up to 8 bits
+        Command serial format is as such:
+        4 bits: command, 
+        12 bits, 8 bits, 8 bits, 8 bits: Nominally representing LED number along with  red, blue and green channels'''
         bytes_0_and_1 = opcode << 12
         bytes_0_and_1 += arg0
         byte_1 = bytes_0_and_1 % 256
@@ -75,16 +82,19 @@ class LedStrip:
         self.serial_con.readline() #Wait for confirmation from the arduino that the op is complete
 
     def set_HSV(self, lednum, h, s, v):
+        '''set HSV for a specific LED at lednum'''
         led = self.LED_data[lednum]
         led.set_HSV(h,s,v)
         self.data_dirty = True
         
     def set_RGB(self, lednum, r, g, b):
+        '''set RGB for a specific LED at lednum'''
         led = self.LED_data[lednum]
         led.set_RGB(r,g,b)
         self.data_dirty = True
         
     def set_HSV_all(self, h, s, v):
+        '''Set HSV for ALL pixels'''
         for led in self.LED_data:
             led.set_HSV(h, s, v)
         self.LED_data[0].read_rgb()
@@ -94,9 +104,8 @@ class LedStrip:
         self.data_dirty = False
         
     def set_RGB_all(self, r, g, b):
+        '''Set RGB for ALL pixels'''
         for led in self.LED_data:
-            led.red, led.green, led.blue  = r, g, b
-            led.rgb_dirty = False
-            led.hsv_dirty = True
+            led.setRGB(r, g, b)
         self.send_command(2, 0, r, g, b)
         self.data_dirty = False
