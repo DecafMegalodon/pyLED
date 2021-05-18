@@ -95,7 +95,9 @@ class LedStrip:
         self.serial_con.readline() #Wait for confirmation from the arduino that the op is complete
 
     def set_HSV(self, lednum, h, s, v, send=False):
-        '''set HSV for a specific LED at lednum. Optional `send` parameter to immediate update (but not draw) the arduino data for the LED'''
+        '''set HSV for a specific LED at lednum. 
+            Optional `send` parameter to immediate update (but not draw) the arduino data for the LED
+            See set_RBG for more information on when to use this option'''
         led = self.LED_data[lednum]
         led.set_HSV(h,s,v)
         if not send: #Update the LED but don't send it (Yet)
@@ -104,7 +106,11 @@ class LedStrip:
             self.send_command(0, lednum, *(led.read_rgb()))
         
     def set_RGB(self, lednum, r, g, b, send=False):
-        '''set RGB for a specific LED at lednum. Optional `send` parameter to immediate update (but not draw) the arduino data for the LED'''
+        '''set RGB for a specific LED at lednum. 
+            Optional `send` parameter to immediate update (but not draw) the arduino data for the LED
+                Recommended when you intend to only update a very small number of LEDs per draw
+                When updating a single LED on a strip of 110, using True resulted in almost 400% more draws/second
+                When using True for a whole-strip update, expect half as many updates/second vs False'''
         led = self.LED_data[lednum]
         led.set_RGB(r,g,b)
         if not send: #Update the LED but don't send it (Yet)
