@@ -30,7 +30,7 @@ class LED:
 
 class LedStrip:
     def __init__(self, port_name, led_count, baud=115200):
-        data_dirty = False  #Do we need to set LEDs on the arduino to display the current colors?
+        self.data_dirty = False  #Do we need to set LEDs on the arduino to display the current colors?
         self.num_led = led_count
         self.LED_data = [LED() for a in range(led_count)]
         try:
