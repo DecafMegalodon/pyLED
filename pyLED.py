@@ -94,17 +94,23 @@ class LedStrip:
             self.send_command(1, 0, 0, 0, 0)
         self.serial_con.readline() #Wait for confirmation from the arduino that the op is complete
 
-    def set_HSV(self, lednum, h, s, v):
-        '''set HSV for a specific LED at lednum'''
+    def set_HSV(self, lednum, h, s, v, send=False):
+        '''set HSV for a specific LED at lednum. Optional `send` parameter to immediate update (but not draw) the arduino data for the LED'''
         led = self.LED_data[lednum]
         led.set_HSV(h,s,v)
-        self.data_dirty = True
+        if not send: #Update the LED but don't send it (Yet)
+            self.data_dirty = True
+        else: #Immediately send the update to the arduino
+            self.send_command(0, lednum, *(led.read_rgb()))
         
-    def set_RGB(self, lednum, r, g, b):
-        '''set RGB for a specific LED at lednum'''
+    def set_RGB(self, lednum, r, g, b, send=False):
+        '''set RGB for a specific LED at lednum. Optional `send` parameter to immediate update (but not draw) the arduino data for the LED'''
         led = self.LED_data[lednum]
         led.set_RGB(r,g,b)
-        self.data_dirty = True
+        if not send: #Update the LED but don't send it (Yet)
+            self.data_dirty = True
+        else: #Immediately send the update to the arduino
+            self.send_command(0, lednum, r, g, b)
         
     def set_HSV_all(self, h, s, v):
         '''Set HSV for ALL pixels'''
@@ -113,7 +119,7 @@ class LedStrip:
         self.LED_data[0].read_rgb()
         #Force HSV->RGB update on the first LED and read the converted RGB.
         self.send_command(2, 0, *(self.LED_data[0].read_rgb()) )
-        #Although some LEDs might be marked dirty for recomputation, the data on the arduino matches that new color data
+        #Although some LEDs might have their RGB marked dirty for recomputation, the data on the arduino matches that new color data
         self.data_dirty = False
         
     def set_RGB_all(self, r, g, b):
