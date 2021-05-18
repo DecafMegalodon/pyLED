@@ -74,7 +74,7 @@ void loop() {
   
   switch(instruction){
     case(0):  //Write an LED 
-      memcpy(leds + cur_LED*3, serial_buffer+2, 3);  //Todo: this could probably be optimized more.
+      memcpy(leds + cur_LED, serial_buffer+2, 3);  //Todo: this could probably be optimized more.
       break;
     case(1):  //"Draw" sent LEDs
       FastLED.show();
@@ -90,7 +90,7 @@ void loop() {
       fill_rainbow(leds+cur_LED, serial_buffer[2], serial_buffer[3], serial_buffer[4]);
       break;
     //Full-string update from host. Draws the string once the transmission is complete
-    //After the command is sent, comms should be RGB only until all pixels are updated
+    //After the command is sent, comms should be a stream of R -> G -> B bytes for every LED
     case(4):
       Serial.readBytes((char*) leds, 3*num_LEDs);
       FastLED.show();
