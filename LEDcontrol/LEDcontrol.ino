@@ -44,7 +44,7 @@ void setup() {
   
   while (Serial.available() < 2) {}  //Wait until we know how many LEDs are in the strip. 2 bytes.
   Serial.readBytes((char*) serial_buffer, 2);
-  num_LEDs = int(serial_buffer[1]);
+  num_LEDs = int(serial_buffer[0]*256) + int(serial_buffer[1]);
   leds = new CRGB[num_LEDs];  //This is safe for CRGB even without explicit initialization for each.
   
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, num_LEDs);
