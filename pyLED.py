@@ -16,7 +16,7 @@ class LED:
         
     def set_RGB(self, r = None, g = None, b = None):
         '''Update a pixel's RGB data. If any parameter is not specified, it will remain unchanged'''
-        self.red, self.blue, self.green = (r or self.r), (g or self.g), (b or self.b)
+        self.red, self.blue, self.green = (r or self.red), (g or self.green), (b or self.blue)
         self.hsv_dirty = True
         self.rgb_dirty = True
         
@@ -117,6 +117,16 @@ class LedStrip:
             self.data_dirty = True
         else: #Immediately send the update to the arduino
             self.send_command(0, lednum, r, g, b)
+            
+    def set_HSV_range(self, start, end, h, s, v):  #TODO: Documentation and optimization
+        for led in self.LED_data[start:end]:
+            led.set_HSV(h,s,v)
+        self.data_dirty = True
+        
+    def set_RGB_range(self, start, end, r, g, b): #TODO: Documentation and optimization for this one too!
+        for led in self.LED_data[start:end]:
+            led.set_RGB(r, 255, b)
+        self.data_dirty = True
         
     def set_HSV_all(self, h, s, v):
         '''Set HSV for ALL pixels'''
