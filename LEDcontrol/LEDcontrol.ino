@@ -97,14 +97,14 @@ void loop() {
       Serial.println();
       break;
 	  
-	//Set a section of the LED strip to a single RGB color
-	//Arg 0: command (5)
-	//Arg 1: starting LED, 12 bits
-	//Arg 2: Number of LEDs, the first inclusive. 8 bits. If you need more than 255, you'll need to issue multiple commands
-	//Arg 3 -> 5 R, G, B colors, 8 bits each
-	case(5):
-		//Not yet implemented
-		break;
+    //Set a section of the LED strip to a single RGB color
+    //Arg 0: command (5)
+    //Arg 1: starting LED, 12 bits
+    //Arg 2: Number of LEDs, the first inclusive. 8 bits. If you need more than 255, you'll need to issue multiple commands
+    //Arg 3 -> 5 R, G, B colors, 8 bits each
+    case(5):
+      //Not yet implemented
+      break;
     case(15):  //Query information from a running LED strip. Return format subject to dramatically changing currently
       Serial.println(num_LEDs);
     }
