@@ -121,16 +121,6 @@ class LedStrip:
             self.data_dirty = True
         else: #Immediately send the update to the arduino
             self.send_command(0, lednum, r, g, b)
-            
-    def set_HSV_range(self, start, end, h, s, v):  #TODO: Documentation and optimization
-        for led in self.LED_data[start:end]:
-            led.set_HSV(h,s,v)
-        self.data_dirty = True
-        
-    def set_RGB_range(self, start, end, r, g, b): #TODO: Documentation and optimization for this one too!
-        for led in self.LED_data[start:end]:
-            led.set_RGB(r, 255, b)
-        self.data_dirty = True
         
     def set_HSV_all(self, h, s, v, zone="all"):
         '''Set HSV for ALL pixels in a zone'''
@@ -143,7 +133,7 @@ class LedStrip:
         '''Set RGB for ALL pixels in zone'''
         work_zone = self.zones[zone]
         for led in work_zone["data"]:
-            led.set_RGB(r, g, b)
+            led.set_ RGB(r, g, b)
         
         if work_zone["length"] > 255:
             print("Zone lengths over 255 NYI")
