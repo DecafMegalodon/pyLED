@@ -109,11 +109,10 @@ void loop() {
     //After sending the command, transmit the R, G, B value of the LED with no other bytes
     case(5):
       Serial.readBytes((char*) serial_buffer, 3);  //Read the R,G,B in from serial. Args 3 and 4 are untouched in this read
-      //      memcpy(leds + cur_LED, serial_buffer+2, 3);  //Todo: this could probably be optimized more.
-      for(CRGB* opLED = leds + cur_LED; opLED < (leds + cur_LED + serial_buffer[3]); opLED += serial_buffer[4])
-      {
-        memcpy(serial_buffer, opLED, 3);
-      }
+      serial_buffer[0] = 32;
+      serial_buffer[1] = 0;
+      serial_buffer[2] = 0;
+      memcpy(leds, serial_buffer, 3);
       break;
     case(15):  //Query information from a running LED strip. Return format subject to dramatically changing currently
       Serial.println(num_LEDs);

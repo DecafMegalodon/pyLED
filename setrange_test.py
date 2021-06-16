@@ -17,4 +17,4 @@ for start in range(0, 10):
         arduino.send_command(5, start, 0, 20, skip)
         arduino.serial_con.write([255,0,0])
         arduino.display()
-        time.sleep(.1)
+        time.sleep(1)
