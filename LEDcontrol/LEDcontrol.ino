@@ -110,7 +110,9 @@ void loop() {
     case(5):
       Serial.readBytes((char*) serial_buffer, 3);  //Read the R,G,B in from serial. Args 3 and 4 are untouched in this read
       //      memcpy(leds + LED_arg_1, serial_buffer+2, 3);  //Todo: this could probably be optimized more.
-      for(CRGB* opLED = leds + LED_arg_1; opLED < (leds + LED_arg_1 + serial_buffer[3]); opLED += serial_buffer[4])
+      for(CRGB* opLED = leds + LED_arg_1; 
+          opLED < (leds + LED_arg_1 + serial_buffer[3]);
+          opLED += 2)
       {
         memcpy(opLED, serial_buffer, 3);
       }

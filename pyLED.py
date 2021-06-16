@@ -127,13 +127,13 @@ class LedStrip:
         work_zone = self.zones[zone]
         work_zone["data"][0].set_HSV(h, s, v)
         r, g, b = work_zone["data"][0].read_rgb() #Get RGB value by updating the first LED and reading the converted RGB.
-        self.set_RGB_all(r, g, b, zone)
+        self.set_RGB_all(r, g, b, zone=zone)
         
     def set_RGB_all(self, r, g, b, zone="all"):
         '''Set RGB for ALL pixels in zone'''
         work_zone = self.zones[zone]
         for led in work_zone["data"]:
-            led.set_ RGB(r, g, b)
+            led.set_RGB(r, g, b)
         
         if work_zone["length"] > 255:
             print("Zone lengths over 255 NYI")
@@ -143,7 +143,6 @@ class LedStrip:
                                                     work_zone["length"], 
                                                     work_zone["increment"])
             self.serial_con.write([r,g,b])
-        self.send_command(2, 0, r, g, b)
         
     def define_zone(self, name, start, length, increment=1):
         self.zones[name] = {"data":self.LED_data[start:length:increment], 
