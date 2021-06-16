@@ -33,6 +33,7 @@ class LedStrip:
         self.data_dirty = False  #Do we need to set LEDs on the arduino to display the current colors?
         self.num_led = led_count
         self.LED_data = [LED() for a in range(led_count)]
+        self.zones = {"all": self.LED_data}
         try:
             self.serial_con = serial.Serial(port=port_name, baudrate=baud, timeout=1)
             if self.serial_con.is_open:
@@ -128,15 +129,15 @@ class LedStrip:
             led.set_RGB(r, 255, b)
         self.data_dirty = True
         
-    def set_HSV_all(self, h, s, v):
+    def set_HSV_all(self, h, s, v, zone="all"):
         '''Set HSV for ALL pixels'''
-        for led in self.LED_data:
+        for led in self.zones[zone]:
             led.set_HSV(h, s, v)
         self.LED_data[0].read_rgb()
         #Force HSV->RGB update on the first LED and read the converted RGB.
-        self.send_command(2, 0, *(self.LED_data[0].read_rgb()) )
+        #self.send_command(2, 0, *(self.LED_data[0].read_rgb()) )  #Temporarily disabled
         #Although some LEDs might have their RGB marked dirty for recomputation, the data on the arduino matches that new color data
-        self.data_dirty = False
+        self.data_dirty = True
         
     def set_RGB_all(self, r, g, b):
         '''Set RGB for ALL pixels'''
@@ -144,3 +145,6 @@ class LedStrip:
             led.setRGB(r, g, b)
         self.send_command(2, 0, r, g, b)
         self.data_dirty = False
+        
+    def define_zone(self, name, start, end, increment=1):
+        self.zones[name] = self.LED_data[start:end:increment]
