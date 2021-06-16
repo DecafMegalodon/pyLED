@@ -133,8 +133,7 @@ class LedStrip:
         self.data_dirty = True
         
     def set_HSV_all(self, h, s, v, zone="all"):
-        '''Set HSV for ALL pixels'''
-        print(self.zones[zone])
+        '''Set HSV for ALL pixels in a zone'''
         for led in self.zones[zone]["data"]:
             led.set_HSV(h, s, v)
         self.LED_data[0].read_rgb()
