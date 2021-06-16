@@ -101,7 +101,9 @@ void loop() {
     //Arg 0: command (5)
     //Arg 1: starting LED, 12 bits
     //Arg 2: Number of LEDs, the first inclusive. 8 bits. If you need more than 255, you'll need to issue multiple commands
-    //Arg 3 -> 5 R, G, B colors, 8 bits each
+    //Arg 3: The increment between LEDs. 8 bits.
+    //Arg 4: Unused
+    //After sending the command, transmit the R, G, B value of the LED with no other bytes
     case(5):
       //Not yet implemented
       break;
