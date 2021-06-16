@@ -135,28 +135,25 @@ class LedStrip:
     def set_HSV_all(self, h, s, v, zone="all"):
         '''Set HSV for ALL pixels in a zone'''
         work_zone = self.zones[zone]
-        for led in work_zone["data"]:
-            led.set_HSV(h, s, v)
-        r, g, b = work_zone["data"][0].read_rgb() #Force HSV->RGB update on the first LED by reading the converted RGB.
+        work_zone["data"][0].set_HSV(h, s, v)
+        r, g, b = work_zone["data"][0].read_rgb() #Get RGB value by updating the first LED and reading the converted RGB.
+        self.set_RGB_all(r, g, b, zone)
         
-        #todo: consider implementing a non-sending flag
+    def set_RGB_all(self, r, g, b, zone="all"):
+        '''Set RGB for ALL pixels in zone'''
+        work_zone = self.zones[zone]
+        for led in work_zone["data"]:
+            led.set_RGB(r, g, b)
         
         if work_zone["length"] > 255:
-            print("work zone too long for one call")
+            print("Zone lengths over 255 NYI")
         else:
             self.send_command(5, work_zone["start"], 
                                                     0, 
                                                     work_zone["length"], 
                                                     work_zone["increment"])
             self.serial_con.write([r,g,b])
-        #Although some LEDs might have their RGB marked dirty for recomputation, the data on the arduino matches that new color data
-        
-    def set_RGB_all(self, r, g, b):
-        '''Set RGB for ALL pixels'''
-        for led in self.LED_data:
-            led.setRGB(r, g, b)
         self.send_command(2, 0, r, g, b)
-        self.data_dirty = False
         
     def define_zone(self, name, start, length, increment=1):
         self.zones[name] = {"data":self.LED_data[start:length:increment], 
