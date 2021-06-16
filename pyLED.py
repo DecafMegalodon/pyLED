@@ -134,13 +134,22 @@ class LedStrip:
         
     def set_HSV_all(self, h, s, v, zone="all"):
         '''Set HSV for ALL pixels in a zone'''
-        for led in self.zones[zone]["data"]:
+        work_zone = self.zones[zone]
+        for led in work_zone["data"]:
             led.set_HSV(h, s, v)
-        self.LED_data[0].read_rgb()
-        #Force HSV->RGB update on the first LED and read the converted RGB.
-        #self.send_command(2, 0, *(self.LED_data[0].read_rgb()) )  #Temporarily disabled
+        r, g, b = work_zone["data"][0].read_rgb() #Force HSV->RGB update on the first LED by reading the converted RGB.
+        
+        #todo: consider implementing a non-sending flag
+        
+        if work_zone["length"] > 255:
+            print("work zone too long for one call")
+        else:
+            self.send_command(5, work_zone["start"], 
+                                                    0, 
+                                                    work_zone["length"], 
+                                                    work_zone["increment"])
+            self.serial_con.write([r,g,b])
         #Although some LEDs might have their RGB marked dirty for recomputation, the data on the arduino matches that new color data
-        self.data_dirty = True
         
     def set_RGB_all(self, r, g, b):
         '''Set RGB for ALL pixels'''
