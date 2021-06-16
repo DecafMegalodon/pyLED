@@ -33,7 +33,10 @@ class LedStrip:
         self.data_dirty = False  #Do we need to set LEDs on the arduino to display the current colors?
         self.num_led = led_count
         self.LED_data = [LED() for a in range(led_count)]
-        self.zones = {"all": self.LED_data}
+        self.zones = {"all": {"data":self.LED_data, 
+                                        "start":0, 
+                                        "length": led_count-1, 
+                                        "increment":1}}
         try:
             self.serial_con = serial.Serial(port=port_name, baudrate=baud, timeout=1)
             if self.serial_con.is_open:
@@ -146,5 +149,8 @@ class LedStrip:
         self.send_command(2, 0, r, g, b)
         self.data_dirty = False
         
-    def define_zone(self, name, start, end, increment=1):
-        self.zones[name] = self.LED_data[start:end:increment]
+    def define_zone(self, name, start, length, increment=1):
+        self.zones[name] = {name: {"data":self.LED_data[start:end:increment], 
+                                        "start":start, 
+                                        "length": length, 
+                                        "increment": increment}}
