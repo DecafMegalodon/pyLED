@@ -32,7 +32,7 @@ byte serial_buffer[5];
 int num_LEDs;
 CRGB* leds; //The LED strip data
 int instruction;
-int cur_LED;
+int LED_arg_1;
 long timeout = 0;
 
 void setup() {
@@ -68,27 +68,30 @@ void loop() {
   Serial.readBytes((char*) serial_buffer, 5);
   
   instruction = serial_buffer[0] >> 4;  //Take only the high 4 bits of byte 1
-  cur_LED = (serial_buffer[0] << 12 >> 4) + serial_buffer[1];  //Shift out the high 4 bites of buffer[0] since they're the instruction, not LED data
-                                                               //We're operating under the assumption of 16 bit math 
-  //Todo: Determine if bit shifting or modular arithmetic are faster on this platform
+  LED_arg_1 = (serial_buffer[0] << 12 >> 4) + serial_buffer[1];  //Shift out the high 4 bites of buffer[0] since they're the instruction, not LED data
+                                                               //We're operating under the assumption of 16 bit math
   
   switch(instruction){
     case(0):  //Write an LED 
-      memcpy(leds + cur_LED, serial_buffer+2, 3);  //Todo: this could probably be optimized more.
+      memcpy(leds + LED_arg_1, serial_buffer+2, 3);  //Todo: this could probably be optimized more.
       break;
+
     case(1):  //"Draw" sent LEDs
       FastLED.show();
       Serial.println();  //Send an empty line over serial so the host knows when we can accept input again
       break;
+
     case(2):  //Set all LEDs to the same color
       fill_solid(leds, num_LEDs, CRGB(serial_buffer[2], serial_buffer[3], serial_buffer[4]));
       break;
+
     //Set a (Max value and max saturation) hue gradient.
-    //Custom operands: cur_LED is the starting LED, R is the number of LEDs (limited to 255), G is the initial hue, and B is the hue step between LEDs
+    //Custom operands: LED_arg_1 is the starting LED, R is the number of LEDs (limited to 255), G is the initial hue, and B is the hue step between LEDs
     //If more than 255 LEDs are needed, send a second rainbow draw command
     case(3):
-      fill_rainbow(leds+cur_LED, serial_buffer[2], serial_buffer[3], serial_buffer[4]);
+      fill_rainbow(leds + LED_arg_1, serial_buffer[2], serial_buffer[3], serial_buffer[4]);
       break;
+
     //Full-string update from host. Draws the string once the transmission is complete
     //After the command is sent, comms should be a stream of R -> G -> B bytes for every LED
     case(4):
@@ -100,10 +103,17 @@ void loop() {
     //Set a section of the LED strip to a single RGB color
     //Arg 0: command (5)
     //Arg 1: starting LED, 12 bits
-    //Arg 2: Number of LEDs, the first inclusive. 8 bits. If you need more than 255, you'll need to issue multiple commands
-    //Arg 3 -> 5 R, G, B colors, 8 bits each
+    //Arg 2: Unused
+    //Arg 3: Number of LEDs, the first inclusive. 8 bits. If you need more than 255, you'll need to issue multiple commands
+    //Arg 4: The increment between LEDs. 8 bits.
+    //After sending the command, transmit the R, G, B value of the LED with no other bytes
     case(5):
-      //Not yet implemented
+      Serial.readBytes((char*) serial_buffer, 3);  //Read the R,G,B in from serial. Args 3 and 4 are untouched in this read
+      //      memcpy(leds + LED_arg_1, serial_buffer+2, 3);  //Todo: this could probably be optimized more.
+      for(CRGB* opLED = leds + LED_arg_1; opLED < (leds + LED_arg_1 + serial_buffer[3]); opLED += serial_buffer[4])
+      {
+        memcpy(opLED, serial_buffer, 3);
+      }
       break;
     case(15):  //Query information from a running LED strip. Return format subject to dramatically changing currently
       Serial.println(num_LEDs);
