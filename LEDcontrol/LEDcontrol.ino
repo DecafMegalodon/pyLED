@@ -32,7 +32,7 @@ byte serial_buffer[5];
 int num_LEDs;
 CRGB* leds; //The LED strip data
 int instruction;
-int cur_LED;
+int LED_arg_1;
 long timeout = 0;
 
 void setup() {
@@ -68,12 +68,12 @@ void loop() {
   Serial.readBytes((char*) serial_buffer, 5);
   
   instruction = serial_buffer[0] >> 4;  //Take only the high 4 bits of byte 1
-  cur_LED = (serial_buffer[0] << 12 >> 4) + serial_buffer[1];  //Shift out the high 4 bites of buffer[0] since they're the instruction, not LED data
+  LED_arg_1 = (serial_buffer[0] << 12 >> 4) + serial_buffer[1];  //Shift out the high 4 bites of buffer[0] since they're the instruction, not LED data
                                                                //We're operating under the assumption of 16 bit math
   
   switch(instruction){
     case(0):  //Write an LED 
-      memcpy(leds + cur_LED, serial_buffer+2, 3);  //Todo: this could probably be optimized more.
+      memcpy(leds + LED_arg_1, serial_buffer+2, 3);  //Todo: this could probably be optimized more.
       break;
 
     case(1):  //"Draw" sent LEDs
@@ -86,10 +86,10 @@ void loop() {
       break;
 
     //Set a (Max value and max saturation) hue gradient.
-    //Custom operands: cur_LED is the starting LED, R is the number of LEDs (limited to 255), G is the initial hue, and B is the hue step between LEDs
+    //Custom operands: LED_arg_1 is the starting LED, R is the number of LEDs (limited to 255), G is the initial hue, and B is the hue step between LEDs
     //If more than 255 LEDs are needed, send a second rainbow draw command
     case(3):
-      fill_rainbow(leds+cur_LED, serial_buffer[2], serial_buffer[3], serial_buffer[4]);
+      fill_rainbow(leds + LED_arg_1, serial_buffer[2], serial_buffer[3], serial_buffer[4]);
       break;
 
     //Full-string update from host. Draws the string once the transmission is complete
@@ -109,10 +109,11 @@ void loop() {
     //After sending the command, transmit the R, G, B value of the LED with no other bytes
     case(5):
       Serial.readBytes((char*) serial_buffer, 3);  //Read the R,G,B in from serial. Args 3 and 4 are untouched in this read
-      serial_buffer[0] = 32;
-      serial_buffer[1] = 0;
-      serial_buffer[2] = 0;
-      memcpy(leds, serial_buffer, 3);
+      //      memcpy(leds + LED_arg_1, serial_buffer+2, 3);  //Todo: this could probably be optimized more.
+      for(CRGB* opLED = leds + LED_arg_1; opLED < (leds + LED_arg_1 + serial_buffer[3]); opLED += serial_buffer[4])
+      {
+        memcpy(opLED, serial_buffer, 3);
+      }
       break;
     case(15):  //Query information from a running LED strip. Return format subject to dramatically changing currently
       Serial.println(num_LEDs);
