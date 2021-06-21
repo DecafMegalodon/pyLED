@@ -1,5 +1,6 @@
 import serial
 import colorsys
+import random
 
 class LED:
     def __init__(self, red = 0, blue = 0, green = 0):
@@ -135,17 +136,29 @@ class LedStrip:
         for led in work_zone["data"]:
             led.set_RGB(r, g, b)
         
+        work_to_draw = work_zone["length"]
+        
         if work_zone["length"] > 255:
-            print("Zone lengths over 255 NYI")
-        else:
-            self.send_command(5, work_zone["start"], 
-                                                    0, 
-                                                    work_zone["length"], 
-                                                    work_zone["increment"])
-            self.serial_con.write([r,g,b])
+            random_name = random.random() #It's possible, abeit unlikely this could collide on a system without good random initialization
+            self.define_zone(random_name, work_zone["start"] + 
+                                                                            255 // work_zone["increment"] * work_zone["increment"],  #The largest number less than 255 that is a multiple of the increment
+                                                                work_zone["length"]-255,
+                                                                work_zone["increment"])            
+            self.set_RGB_all(r, g, b, zone=random_name)
+            self.destroy_zone(random_name)
+            work_to_draw = 255
+            
+        self.send_command(5, work_zone["start"], 
+                                                0, 
+                                                work_to_draw, 
+                                                work_zone["increment"])
+        self.serial_con.write([r,g,b])
         
     def define_zone(self, name, start, length, increment=1):
         self.zones[name] = {"data":self.LED_data[start:length:increment], 
                                         "start":start, 
                                         "length": length, 
                                         "increment": increment}
+                                        
+    def destroy_zone(self, name):
+        del self.zones[name]
